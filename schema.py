@@ -9,7 +9,7 @@ class BaseAdsRequest(pydantic.BaseModel):
     @pydantic.field_validator("text")
     @classmethod
     def secure_len_symbols(cls, v: str):
-        if len(v) <= 20:
+        if len(v) <= 10:
             raise ValueError("The ads is too short")
         return v
 

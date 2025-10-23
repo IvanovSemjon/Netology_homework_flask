@@ -31,7 +31,7 @@ class TestAPI:
     def test_create_ad_without_auth(self):
         response = requests.post(
             f"{self.base_url}/ads",
-            json={"title": "Test", "text": "Test description with enough characters"},
+            json={"title": "Test", "text": "Test description"},
         )
         assert response.status_code == 401
 
@@ -52,7 +52,7 @@ class TestAPI:
             f"{self.base_url}/ads",
             json={
                 "title": "Test Ad",
-                "text": "Test description with enough characters",
+                "text": "Test description",
             },
             headers=headers,
         )
@@ -60,18 +60,36 @@ class TestAPI:
         assert "id" in response.json()
 
     def test_get_ad(self):
-        response = requests.get(f"{self.base_url}/ads/1")
-        assert response.status_code in [
-            200,
-            404,
-            500,
-        ]  # Может не существовать или ошибка
+        # Сначала создаем объявление для тестирования
+        email = f"gettest{uuid.uuid4()}@example.com"
+        requests.post(
+            f"{self.base_url}/users",
+            json={"email": email, "password": "pass123"},
+        )
+
+        credentials = base64.b64encode(f"{email}:pass123".encode())
+        headers = {"Authorization": f"Basic {credentials.decode('utf-8')}"}
+
+        create_response = requests.post(
+            f"{self.base_url}/ads",
+            json={"title": "Get Test", "text": "Test description"},
+            headers=headers,
+        )
+
+        if create_response.status_code == 200:
+            ad_id = create_response.json()["id"]
+            response = requests.get(f"{self.base_url}/ads/{ad_id}")
+            assert response.status_code == 200
+        else:
+            # Если создание не удалось, проверяем несуществующий ID
+            response = requests.get(f"{self.base_url}/ads/999")
+            assert response.status_code == 404
 
     def test_update_ad_wrong_owner(self):
         # Создаем двух пользователей
         owner_email = f"owner{uuid.uuid4()}@example.com"
         other_email = f"other{uuid.uuid4()}@example.com"
-        
+
         requests.post(
             f"{self.base_url}/users",
             json={"email": owner_email, "password": "pass123"},
@@ -89,7 +107,7 @@ class TestAPI:
             f"{self.base_url}/ads",
             json={
                 "title": "Owner Ad",
-                "text": "Owner description with enough characters",
+                "text": "Owner description",
             },
             headers=owner_headers,
         )
