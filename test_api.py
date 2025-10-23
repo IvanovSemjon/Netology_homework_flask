@@ -3,14 +3,18 @@ import base64
 import subprocess
 import time
 import uuid
+import os
 
 
 class TestAPI:
     @classmethod
     def setup_class(cls):
+        # Удаляем старую БД если есть
+        if os.path.exists("bulletin_board.db"):
+            os.remove("bulletin_board.db")
         # Запускаем сервер в фоне
         cls.server_process = subprocess.Popen(["python", "server.py"])
-        time.sleep(2)  # Ждем запуска сервера
+        time.sleep(3)  # Ждем запуска сервера
         cls.base_url = "http://127.0.0.1:5000"
 
     @classmethod
@@ -18,6 +22,9 @@ class TestAPI:
         # Останавливаем сервер
         cls.server_process.terminate()
         cls.server_process.wait()
+        # Удаляем БД после тестов
+        if os.path.exists("bulletin_board.db"):
+            os.remove("bulletin_board.db")
 
     def test_create_user(self):
         email = f"test{uuid.uuid4()}@example.com"

@@ -5,7 +5,10 @@ from sqlalchemy.orm import sessionmaker, DeclarativeBase, MappedColumn, mapped_c
 
 
 # Используем SQLite для упрощения тестирования
-engine = create_engine("sqlite:///bulletin_board.db")
+import os
+
+db_name = os.getenv("DB_NAME", "bulletin_board.db")
+engine = create_engine(f"sqlite:///{db_name}")
 Session = sessionmaker(bind=engine)
 
 
