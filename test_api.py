@@ -8,7 +8,7 @@ class TestAPI:
     @classmethod
     def setup_class(cls):
         # Запускаем сервер в фоне
-        cls.server_process = subprocess.Popen(['python', 'server.py'])
+        cls.server_process = subprocess.Popen(["python", "server.py"])
         time.sleep(2)  # Ждем запуска сервера
         cls.base_url = "http://127.0.0.1:5000"
 
@@ -21,15 +21,14 @@ class TestAPI:
     def test_create_user(self):
         response = requests.post(
             f"{self.base_url}/users",
-            json={"email": "test@example.com", "password": "test123"}
+            json={"email": "test@example.com", "password": "test123"},
         )
         assert response.status_code == 200
         assert "id" in response.json()
 
     def test_create_ad_without_auth(self):
         response = requests.post(
-            f"{self.base_url}/ads",
-            json={"title": "Test", "text": "Test description"}
+            f"{self.base_url}/ads", json={"title": "Test", "text": "Test description"}
         )
         assert response.status_code == 401
 
@@ -37,7 +36,7 @@ class TestAPI:
         # Создаем пользователя
         requests.post(
             f"{self.base_url}/users",
-            json={"email": "user2@example.com", "password": "pass123"}
+            json={"email": "user2@example.com", "password": "pass123"},
         )
 
         # Авторизация
@@ -47,7 +46,7 @@ class TestAPI:
         response = requests.post(
             f"{self.base_url}/ads",
             json={"title": "Test Ad", "text": "Test description"},
-            headers=headers
+            headers=headers,
         )
         assert response.status_code == 200
         assert "id" in response.json()
@@ -60,11 +59,11 @@ class TestAPI:
         # Создаем двух пользователей
         requests.post(
             f"{self.base_url}/users",
-            json={"email": "owner@example.com", "password": "pass123"}
+            json={"email": "owner@example.com", "password": "pass123"},
         )
         requests.post(
             f"{self.base_url}/users",
-            json={"email": "other@example.com", "password": "pass123"}
+            json={"email": "other@example.com", "password": "pass123"},
         )
 
         # Создаем объявление от первого пользователя
@@ -74,7 +73,7 @@ class TestAPI:
         create_response = requests.post(
             f"{self.base_url}/ads",
             json={"title": "Owner Ad", "text": "Owner description"},
-            headers=owner_headers
+            headers=owner_headers,
         )
         ad_id = create_response.json()["id"]
 
@@ -85,6 +84,6 @@ class TestAPI:
         response = requests.patch(
             f"{self.base_url}/ads/{ad_id}",
             json={"title": "Hacked"},
-            headers=other_headers
+            headers=other_headers,
         )
         assert response.status_code == 403

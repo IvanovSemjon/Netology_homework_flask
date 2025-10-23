@@ -1,23 +1,11 @@
 import atexit
 import datetime
-from sqlalchemy import (
-    create_engine,
-    Integer,
-    String,
-    DateTime,
-    func,
-    ForeignKey
-)
-from sqlalchemy.orm import (
-    sessionmaker,
-    DeclarativeBase,
-    MappedColumn,
-    mapped_column
-)
+from sqlalchemy import create_engine, Integer, String, DateTime, func, ForeignKey
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, MappedColumn, mapped_column
 
 
 # Используем SQLite для упрощения тестирования
-engine = create_engine('sqlite:///bulletin_board.db')
+engine = create_engine("sqlite:///bulletin_board.db")
 Session = sessionmaker(bind=engine)
 
 
@@ -26,30 +14,23 @@ class Base(DeclarativeBase):
 
 
 class User(Base):
-    __tablename__ = 'users'
+    __tablename__ = "users"
 
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
-    email: MappedColumn[str] = mapped_column(
-        String(100), unique=True, nullable=False
-    )
-    password_hash: MappedColumn[str] = mapped_column(
-        String(128), nullable=False
-    )
+    email: MappedColumn[str] = mapped_column(String(100), unique=True, nullable=False)
+    password_hash: MappedColumn[str] = mapped_column(String(128), nullable=False)
 
     @property
     def json(self):
-        return {
-            'id': self.id,
-            'email': self.email
-        }
+        return {"id": self.id, "email": self.email}
 
     @property
     def id_json(self):
-        return {'id': self.id}
+        return {"id": self.id}
 
 
 class Bulletin_board(Base):
-    __tablename__ = 'bulletin_board'
+    __tablename__ = "bulletin_board"
 
     id: MappedColumn[int] = mapped_column(Integer, primary_key=True)
     title: MappedColumn[str] = mapped_column(String(80))
@@ -58,22 +39,22 @@ class Bulletin_board(Base):
         DateTime, default=func.now()
     )
     user_id: MappedColumn[int] = mapped_column(
-        Integer, ForeignKey('users.id'), nullable=False
+        Integer, ForeignKey("users.id"), nullable=False
     )
 
     @property
     def json(self):
         return {
-            'id': self.id,
-            'title': self.title,
-            'text': self.text,
-            'registration_date': self.registration_date.isoformat(),
-            'user_id': self.user_id
+            "id": self.id,
+            "title": self.title,
+            "text": self.text,
+            "registration_date": self.registration_date.isoformat(),
+            "user_id": self.user_id,
         }
 
     @property
     def id_json(self):
-        return {'id': self.id}
+        return {"id": self.id}
 
 
 Base.metadata.create_all(engine)

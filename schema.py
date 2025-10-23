@@ -54,10 +54,13 @@ class LoginRequest(pydantic.BaseModel):
 
 def validate(
     schema: type[
-        CreateAdsRequest | UpdateAdsRequest | CreateUserRequest
-        | UpdateUserRequest | LoginRequest
+        CreateAdsRequest
+        | UpdateAdsRequest
+        | CreateUserRequest
+        | UpdateUserRequest
+        | LoginRequest
     ],
-    json_data: dict
+    json_data: dict,
 ):
     try:
         schema_instance = schema(**json_data)

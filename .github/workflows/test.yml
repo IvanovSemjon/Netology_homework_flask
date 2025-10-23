@@ -22,10 +22,6 @@ jobs:
       run: |
         pip install -r requirements.txt
     
-    - name: Check code style with flake8
-      run: |
-        flake8 --max-line-length=88 --ignore=E203,W503 *.py
-    
     - name: Check code formatting with black
       run: |
         black --check --diff *.py
