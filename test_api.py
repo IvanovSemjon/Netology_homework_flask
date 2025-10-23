@@ -2,6 +2,7 @@ import requests
 import base64
 import subprocess
 import time
+import uuid
 
 
 class TestAPI:
@@ -19,9 +20,10 @@ class TestAPI:
         cls.server_process.wait()
 
     def test_create_user(self):
+        email = f"test{uuid.uuid4()}@example.com"
         response = requests.post(
             f"{self.base_url}/users",
-            json={"email": "test@example.com", "password": "test123"},
+            json={"email": email, "password": "test123"},
         )
         assert response.status_code == 200
         assert "id" in response.json()
@@ -35,13 +37,15 @@ class TestAPI:
 
     def test_create_ad_with_auth(self):
         # Создаем пользователя
-        requests.post(
+        email = f"user{uuid.uuid4()}@example.com"
+        user_response = requests.post(
             f"{self.base_url}/users",
-            json={"email": "user2@example.com", "password": "pass123"},
+            json={"email": email, "password": "pass123"},
         )
+        assert user_response.status_code == 200
 
         # Авторизация
-        credentials = base64.b64encode(b"user2@example.com:pass123")
+        credentials = base64.b64encode(f"{email}:pass123".encode())
         headers = {"Authorization": f"Basic {credentials.decode('utf-8')}"}
 
         response = requests.post(
@@ -65,17 +69,20 @@ class TestAPI:
 
     def test_update_ad_wrong_owner(self):
         # Создаем двух пользователей
+        owner_email = f"owner{uuid.uuid4()}@example.com"
+        other_email = f"other{uuid.uuid4()}@example.com"
+        
         requests.post(
             f"{self.base_url}/users",
-            json={"email": "owner@example.com", "password": "pass123"},
+            json={"email": owner_email, "password": "pass123"},
         )
         requests.post(
             f"{self.base_url}/users",
-            json={"email": "other@example.com", "password": "pass123"},
+            json={"email": other_email, "password": "pass123"},
         )
 
         # Создаем объявление от первого пользователя
-        owner_creds = base64.b64encode(b"owner@example.com:pass123")
+        owner_creds = base64.b64encode(f"{owner_email}:pass123".encode())
         owner_headers = {"Authorization": f"Basic {owner_creds.decode()}"}
 
         create_response = requests.post(
@@ -93,7 +100,7 @@ class TestAPI:
             return
 
         # Пытаемся изменить от другого пользователя
-        other_creds = base64.b64encode(b"other@example.com:pass123")
+        other_creds = base64.b64encode(f"{other_email}:pass123".encode())
         other_headers = {"Authorization": f"Basic {other_creds.decode()}"}
 
         response = requests.patch(
