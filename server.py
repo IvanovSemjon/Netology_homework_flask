@@ -1,11 +1,13 @@
-from flask import Flask, jsonify, request
-from flask.views import MethodView
-from models import Session, Bulletin_board, User
-from errors import HttpError
+import json
+
+from aiohttp import web
+from aiohttp.web import Application, Request, json_response, run_app
 from sqlalchemy.exc import IntegrityError
-from schema import validate, CreateAdsRequest, UpdateAdsRequest, CreateUserRequest
-import hashlib
-import base64
+from sqlalchemy.ext.asyncio import AsyncSession as SessType
+
+from auth import hash_password
+from model import AsyncSession, User, close_db, init_db
+
 
 app = Flask("app")
 app.config["JSON_AS_ASCII"] = False
